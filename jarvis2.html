@@ -1,0 +1,113 @@
+    <!doctype html>
+	<head>
+		<style>
+			/* CSS comes here */
+			body {
+				font-family: arial;
+			}
+			button {
+				padding:10px;
+				background-color:#6a67ce;
+				color: #FFFFFF;
+				border: 0px;
+				cursor:pointer;
+				border-radius: 5px;
+			}
+			#output {
+				background-color:#F9F9F9;
+				padding:10px;
+				width: 100%;
+				margin-top:20px;
+				line-height:30px;
+			}
+			.hide {
+				display:none;
+			}
+			.show {
+				display:block;
+			}
+		</style>
+		<title>JavaScript Speech to Text</title>
+	</head>
+	<body onload="runSpeechRecognition()">
+		<h2>Jarivs</h2>
+		<p>Click on the below button and speak something...</p>
+		<p><button type="button" onclick="runSpeechRecognition()">Speech to Text</button> &nbsp; <span id="action"></span></p>
+		<div id="output" class="hide"></div>
+		<script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+		<script>
+			/* JS comes here */
+			function runSpeechRecognition() {
+				// get output div reference
+				var output = document.getElementById("output");
+				// $('#output').val()
+				// get action element reference
+				var action = document.getElementById("action");
+				// new speech recognition object
+				var SpeechRecognition = SpeechRecognition || webkitSpeechRecognition;
+				var recognition = new SpeechRecognition();
+				
+				// This runs when the speech recognition service starts
+				recognition.onstart = function() {
+					action.innerHTML = "<small>listening, please speak...</small>";
+				};
+				
+				recognition.onspeechend = function() {
+					action.innerHTML = "<small>stopped listening, hope you are done...</small>";
+					recognition.stop();
+				}
+				
+				// This runs when the speech recognition service returns result
+				recognition.onresult = function(event) {
+					var transcript = event.results[0][0].transcript;
+					var confidence = event.results[0][0].confidence;
+					output.innerHTML = "<b>Text:</b> " + transcript + "<br/> <b>Confidence:</b> " + confidence*100+"%";
+					output.classList.remove("hide");
+					let msg = transcript;
+					console.log(msg);
+        const textToBLOB = new Blob([msg], { type: 'text/plain' });
+        const sFileName = 'formData.txt';	   // The file to save the data.
+
+        let newLink = document.createElement("a");
+        newLink.download = sFileName;
+
+        if (window.webkitURL != null) {
+            newLink.href = window.webkitURL.createObjectURL(textToBLOB);
+        }
+        else {
+            newLink.href = window.URL.createObjectURL(textToBLOB);
+            newLink.style.display = "none";
+            document.body.appendChild(newLink);
+        }
+
+        newLink.click(); 
+					$.ajax({
+						url: "savefile.php",
+						type: "get",
+						data: {
+							'text': msg
+						},
+						success: function(data) {
+							console.log(data);
+							// window.location.reload();
+						}
+					});
+					let speech = new SpeechSynthesisUtterance();
+					speech.lang = "en-US";
+					
+					speech.text = msg;
+					speech.volume = 1;
+					speech.rate = 1;
+					speech.pitch = 1;
+					
+					window.speechSynthesis.speak(speech);
+					
+				};
+				
+				// start recognition
+				recognition.start();
+				setTimeout("location.reload(true);",13000);
+			}
+		</script>
+	</body>
+	</html>
