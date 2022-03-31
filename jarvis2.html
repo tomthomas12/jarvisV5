@@ -1,113 +1,340 @@
-    <!doctype html>
-	<head>
-		<style>
-			/* CSS comes here */
-			body {
-				font-family: arial;
-			}
-			button {
-				padding:10px;
-				background-color:#6a67ce;
-				color: #FFFFFF;
-				border: 0px;
-				cursor:pointer;
-				border-radius: 5px;
-			}
-			#output {
-				background-color:#F9F9F9;
-				padding:10px;
-				width: 100%;
-				margin-top:20px;
-				line-height:30px;
-			}
-			.hide {
-				display:none;
-			}
-			.show {
-				display:block;
-			}
-		</style>
-		<title>JavaScript Speech to Text</title>
-	</head>
-	<body onload="runSpeechRecognition()">
-		<h2>Jarivs</h2>
-		<p>Click on the below button and speak something...</p>
-		<p><button type="button" onclick="runSpeechRecognition()">Speech to Text</button> &nbsp; <span id="action"></span></p>
-		<div id="output" class="hide"></div>
-		<script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
-		<script>
-			/* JS comes here */
-			function runSpeechRecognition() {
-				// get output div reference
-				var output = document.getElementById("output");
-				// $('#output').val()
-				// get action element reference
-				var action = document.getElementById("action");
-				// new speech recognition object
-				var SpeechRecognition = SpeechRecognition || webkitSpeechRecognition;
-				var recognition = new SpeechRecognition();
-				
-				// This runs when the speech recognition service starts
-				recognition.onstart = function() {
-					action.innerHTML = "<small>listening, please speak...</small>";
-				};
-				
-				recognition.onspeechend = function() {
-					action.innerHTML = "<small>stopped listening, hope you are done...</small>";
-					recognition.stop();
-				}
-				
-				// This runs when the speech recognition service returns result
-				recognition.onresult = function(event) {
-					var transcript = event.results[0][0].transcript;
-					var confidence = event.results[0][0].confidence;
-					output.innerHTML = "<b>Text:</b> " + transcript + "<br/> <b>Confidence:</b> " + confidence*100+"%";
-					output.classList.remove("hide");
-					let msg = transcript;
-					console.log(msg);
-        const textToBLOB = new Blob([msg], { type: 'text/plain' });
-        const sFileName = 'formData.txt';	   // The file to save the data.
+<!doctype html>
+<head>
+  <style>
+    /* CSS comes here */
+    body{
+background:#1a293e;
 
-        let newLink = document.createElement("a");
-        newLink.download = sFileName;
 
-        if (window.webkitURL != null) {
-            newLink.href = window.webkitURL.createObjectURL(textToBLOB);
-        }
-        else {
-            newLink.href = window.URL.createObjectURL(textToBLOB);
-            newLink.style.display = "none";
-            document.body.appendChild(newLink);
-        }
+}
+.container{
+display: flex;
+ flex-direction: row;
+}
+.container div:first-child(1){
+background-color:#ccffcc;
+flex: 1;
+height:100px;
+width:100px;
+text-align: center;
 
-        newLink.click(); 
-					$.ajax({
-						url: "savefile.php",
-						type: "get",
-						data: {
-							'text': msg
-						},
-						success: function(data) {
-							console.log(data);
-							// window.location.reload();
-						}
-					});
-					let speech = new SpeechSynthesisUtterance();
-					speech.lang = "en-US";
-					
-					speech.text = msg;
-					speech.volume = 1;
-					speech.rate = 1;
-					speech.pitch = 1;
-					
-					window.speechSynthesis.speak(speech);
-					
-				};
-				
-				// start recognition
-				recognition.start();
-				setTimeout("location.reload(true);",13000);
-			}
-		</script>
-	</body>
-	</html>
+
+}
+.first {
+-webkit-flex: 1;
+        flex: 1;
+
+}
+.second {
+-webkit-flex: 2;
+        flex: 2;
+
+}
+.third {
+-webkit-flex: 1;
+        flex: 1;
+}
+#lnav{
+display:none;
+}
+#rnav{
+display:none;
+}
+.nav ul li a{
+text-decoration: none; 
+color:#b3e0ff;
+text-shadow: 0 0 15px #2187e7;
+border: 1px solid #b3e0ff;
+ padding:10px;
+margin:10px;
+ box-shadow: 0 0 5px #2187e7;
+
+}
+.navr{
+
+text-align:right;
+
+
+}
+nav ul li{
+list-style:none;
+  background-image:none;
+  background-repeat:none;
+  background-position:0; 
+  display:box;
+padding:10px;
+margin:25px;
+
+}
+
+p{
+z-index: 999;
+margin-left:66px;
+font-size:46px;
+margin-top:-26px;
+color:#fff;/*4db8ff*/
+paddig:0px;
+position:relative;
+-webkit-animation: neon2 1.5s ease-in-out infinite alternate;
+-moz-animation: neon2 1.5s ease-in-out infinite alternate;
+animation: neon2 1.5s ease-in-out infinite alternate;
+text-shadow: 0 0 15px #b3e0ff;
+
+}
+a:hover{
+cursor:pointer;
+ 
+}
+
+
+#loader-wrapper{
+  position: fixed;
+  top: 40px;
+  left:40%;
+  width: 300px;
+  height: 300px;
+ margin-left:30px;
+  
+}
+#loader {
+  display: block;
+  position: relative;
+  left: 50%;
+  top: 50%;
+  width: 100%;
+  height: 100%;
+  margin: -175px 0 0 -175px;
+  border-radius: 50%;
+  border: 3px solid transparent;
+  border-top-color: #4db8ff;
+border-bottom-color: #b3e0ff;
+border-right-color: #66c2ff;
+border-left-color: #80ccff;
+box-shadow: 0 0 15px #2187e7;
+
+  -webkit-animation: spin 30s linear infinite; /* Chrome, Opera 15+, Safari 5+ */
+  animation: spin 30s linear infinite; /* Chrome, Firefox 16+, IE 10+, Opera */
+}
+#loader1:before {
+  content: "";
+  position: absolute;
+  top: 70px;
+  left: 70px;
+  right: 70px;
+  bottom: 70px;
+  border-radius: 50%;
+  border: 3px solid transparent;
+  border-color: #4398ba;
+
+  border-style:dotted;
+
+  -webkit-animation: spin 18s linear infinite; /* Chrome, Opera 15+, Safari 5+ */
+    animation: spin 18s linear infinite; /* Chrome, Firefox 16+, IE 10+, Opera */
+}
+
+#loader1:after {
+  content: "";
+  position: absolute;
+  top: 55px;
+  left: 55px;
+  right: 55px;
+  bottom: 55px;
+  border-radius: 50%;
+  border-color: #59c1eb;
+ border-width:5px;	
+  border-style:double dashed solid dotted ;
+box-shadow: 0 0 40px #2187e7;
+  -webkit-animation: spin 60s linear infinite; /* Chrome, Opera 15+, Safari 5+ */
+    animation: spin 60s linear infinite; /* Chrome, Firefox 16+, IE 10+, Opera */
+}
+
+
+#loader:before {
+  content: "";
+  position: absolute;
+  top: 15px;
+  left: 15px;
+  right: 15px;
+  bottom: 15px;
+  border-radius: 50%;
+  border: 3px solid transparent;
+  border-color: #1d5ca9;
+
+  border-style:dotted;
+
+  -webkit-animation: spin 18s linear infinite; /* Chrome, Opera 15+, Safari 5+ */
+    animation: spin 18s linear infinite; /* Chrome, Firefox 16+, IE 10+, Opera */
+}
+
+#loader:after {
+  content: "";
+  position: absolute;
+  top: 25px;
+  left: 25px;
+  right: 25px;
+  bottom: 25px;
+  border-radius: 50%;
+  border: 3px solid transparent;
+  border-color: #429bc0;
+ border-width:5px;	
+  border-style:dotted solid;
+  -webkit-animation: spin 60s linear infinite; /* Chrome, Opera 15+, Safari 5+ */
+    animation: spin 60s linear infinite; /* Chrome, Firefox 16+, IE 10+, Opera */
+}
+
+@-webkit-keyframes spin {
+  0%   {
+      -webkit-transform: rotate(0deg);  /* Chrome, Opera 15+, Safari 3.1+ */
+      -ms-transform: rotate(0deg);  /* IE 9 */
+      transform: rotate(0deg);  /* Firefox 16+, IE 10+, Opera */
+  }
+  100% {
+      -webkit-transform: rotate(360deg);  /* Chrome, Opera 15+, Safari 3.1+ */
+      -ms-transform: rotate(360deg);  /* IE 9 */
+      transform: rotate(360deg);  /* Firefox 16+, IE 10+, Opera */
+  }
+}
+@keyframes spin {
+  0%   {
+      -webkit-transform: rotate(0deg);  /* Chrome, Opera 15+, Safari 3.1+ */
+      -ms-transform: rotate(0deg);  /* IE 9 */
+      transform: rotate(0deg);  /* Firefox 16+, IE 10+, Opera */
+  }
+  100% {
+      -webkit-transform: rotate(360deg);  /* Chrome, Opera 15+, Safari 3.1+ */
+      -ms-transform: rotate(360deg);  /* IE 9 */
+      transform: rotate(360deg);  /* Firefox 16+, IE 10+, Opera */
+  }
+}
+
+
+
+@-webkit-keyframes neon2 {
+from {
+  text-shadow: 0 0 10px #fff, 0 0 20px #fff, 0 0 30px #fff, 0 0 40px #228DFF, 0 0 70px #228DFF, 0 0 80px #228DFF, 0 0 100px #228DFF, 0 0 150px #228DFF;
+}
+to {
+  text-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 15px #fff, 0 0 20px #228DFF, 0 0 35px #228DFF, 0 0 40px #228DFF, 0 0 50px #228DFF, 0 0 75px #228DFF;
+}
+}
+
+
+button {
+padding:10px;
+background-color:#6a67ce;
+color: #FFFFFF;
+border: 0px;
+cursor:pointer;
+border-radius: 5px;
+}
+#output {
+background-color:#F9F9F9;
+padding:10px;
+width: 100%;
+margin-top:20px;
+line-height:30px;
+}
+.hide {
+display:none;
+}
+.show {
+display:block;
+}
+  </style>
+  <title>JARVIS</title>
+</head>
+<body onload="runSpeechRecognition()">
+  <div class="container">
+    <div class="first">
+      <div class="leftcontainer">
+      </div>
+    </div>
+    <div class="second">
+      <div id="loader-wrapper">
+        <div id="loader"><div id="loader1"> 
+          </div> 
+          </div>
+      <p><a onclick="rFunction()">JARVIS</a></p>
+  </div>
+      <div class="third">
+      <div class="rightcontainer">
+        <nav class="nav navr"  id="rnav">
+  <ul><li><p><button type="button" onclick="runSpeechRecognition()">Speech to Text</button> &nbsp; <span id="action"></span></p>
+    <div id="output" class="hide"></div></a></li>
+  </ul>
+  </nav>
+      </div>
+      </div>
+  </div>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+  <script>
+    /* JS comes here */
+    function lFunction() {
+        document.getElementById("lnav").style.display = "block";
+  }
+    function rFunction() {
+        document.getElementById("rnav").style.display = "block";
+  }
+    function runSpeechRecognition() {
+      // get output div reference
+      var output = document.getElementById("output");
+      // $('#output').val()
+      // get action element reference
+      var action = document.getElementById("action");
+      // new speech recognition object
+      var SpeechRecognition = SpeechRecognition || webkitSpeechRecognition;
+      var recognition = new SpeechRecognition();
+      
+      // This runs when the speech recognition service starts
+      recognition.onstart = function() {
+        action.innerHTML = "<small>listening, please speak...</small>";
+      };
+      
+      recognition.onspeechend = function() {
+        action.innerHTML = "<small>stopped listening, hope you are done...</small>";
+        recognition.stop();
+      }
+      
+      // This runs when the speech recognition service returns result
+      recognition.onresult = function(event) {
+        var transcript = event.results[0][0].transcript;
+        var confidence = event.results[0][0].confidence;
+        output.innerHTML = "<b>Text:</b> " + transcript + "<br/> <b>Confidence:</b> " + confidence*100+"%";
+        output.classList.remove("hide");
+        let msg = transcript;
+        console.log(msg);
+      const textToBLOB = new Blob([msg], { type: 'text/plain' });
+      const sFileName = 'newfile.txt';	   // The file to save the data.
+
+      let newLink = document.createElement("a");
+      newLink.download = sFileName;
+
+      if (window.webkitURL != null) {
+          newLink.href = window.webkitURL.createObjectURL(textToBLOB);
+      }
+      else {
+          newLink.href = window.URL.createObjectURL(textToBLOB);
+          newLink.style.display = "none";
+          document.body.appendChild(newLink);
+      }
+
+      newLink.click(); 
+        let speech = new SpeechSynthesisUtterance();
+        speech.lang = "en-US";
+        
+        speech.text = msg;
+        speech.volume = 1;
+        speech.rate = 1;
+        speech.pitch = 1;
+        
+        window.speechSynthesis.speak(speech);
+        
+      };
+      
+      // start recognition
+      recognition.start();
+      setTimeout("location.reload(true);",8000);
+    }
+  </script>
+</body>
+</html>
